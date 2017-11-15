@@ -106,16 +106,16 @@ def update_rprop(X, t, W, W_prev_sign, W_delta, eta_p, eta_n):
 
     for i, _ in enumerate(W):
         if W_sign[i] == W_prev_sign[i]:
-            #W_delta[i] *= eta_p
-            W_delta[i] = eta_p*W_up_delta[i]
+            W_delta[i] *= eta_p
+            #W_delta[i] = eta_p*W_up_delta[i]
         else:
-            #W_delta[i] *= eta_n
-            W_change[i]+=1
-            if W_change[i] == 10:
-                W_up_delta[i]*=0.9
-                print("sign changes 10 times ,decay W_up_delta[i]:",i,W_up_delta[i])
-                W_change[i]=0
-            W_delta[i] = eta_n*W_up_delta[i]
+            W_delta[i] *= eta_n
+            # W_change[i]+=1
+            # if W_change[i] == 10:
+            #     W_up_delta[i]*=0.9
+            #     print("sign changes 10 times ,decay W_up_delta[i]:",i,W_up_delta[i])
+            #     W_change[i]=0
+            # W_delta[i] = eta_n*W_up_delta[i]
     return W_delta, W_sign,error,W_grads
 
 # Perform Rprop optimisation
@@ -134,17 +134,20 @@ ls_of_ws = [(W[0], W[1])]  # List of weights to plot
 # Iterate over 500 iterations
 for r in range(500):
     # Get the update values and sign of the last gradient
-    if(r==196):
-        W_up_delta[0]*=0.5
-        W_up_delta[1]*= 0.5
+    # if(r==196):
+    #     W_up_delta[0]*=0.5
+    #     W_up_delta[1]*= 0.5
     W_delta, W_sign,error,W_grads= update_rprop(X, t, W, W_sign, W_delta, eta_p, eta_n)
     # Update each weight parameter seperately
+    if(W_sign[0] == 0 or W_sign[1] == 0):
+        print("finish !")
+        exit()
     for i, _ in enumerate(W):
-        if(abs(W_grads[i])<abs(W_sign[i] * W_delta[i])):
-            print("use W_grads")
-            W[i]-=W_grads[i]
-        else:
-            W[i] -= W_sign[i] * W_delta[i]
+        # if(abs(W_grads[i])<abs(W_sign[i] * W_delta[i])):
+        #     print("use W_grads")
+        #      W[i]-=W_grads[i]
+        #else:
+             W[i] -= W_sign[i] * W_delta[i]
     if(abs(error)<abs(last_error)):
         stable_cnt+=1
     else:
